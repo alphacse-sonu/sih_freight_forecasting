@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAIL NaviFreight AI | Intelligent Freight Forecasting & Vessel Chartering</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Chart.js for High-Fidelity Interactive Forecasting -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Leaflet for Shipping Trade Lane Route Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+</head>
+<body class="bg-navy-dark text-slate-100 font-sans antialiased">
+    <!-- Top Global Header -->
+    <header class="top-nav glass-header">
+        <div class="header-container">
+            <div class="brand-group">
+                <div class="logo-badge">
+                    <i class="fa-solid fa-anchor text-cyan-400"></i>
+                </div>
+                <div class="brand-titles">
+                    <div class="brand-main">SAIL <span class="text-cyan-400">NaviFreight AI</span></div>
+                    <div class="brand-sub">Ministry of Steel • Steel Authority of India Limited • SIH PS-26006</div>
+                </div>
+            </div>
+
+            <div class="header-status">
+                <div class="status-indicator">
+                    <span class="status-dot pulse-green"></span>
+                    <span class="status-text">AI DECISION SYSTEM LIVE</span>
+                </div>
+                <div class="market-date-pill" id="liveMarketDate">
+                    <i class="fa-regular fa-calendar-check"></i> <span id="currentDateDisplay">Loading Market...</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Navigation Bar -->
+    <nav class="sub-nav">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('cockpit')">
+                <i class="fa-solid fa-gauge-high"></i> Executive Cockpit
+            </button>
+            <button class="tab-btn" onclick="switchTab('forecast')">
+                <i class="fa-solid fa-chart-line"></i> Freight Forecast Studio
+            </button>
+            <button class="tab-btn highlight-tab" onclick="switchTab('simulator')">
+                <i class="fa-solid fa-ship"></i> Charter Optimizer & Simulator
+            </button>
+            <button class="tab-btn" onclick="switchTab('ports')">
+                <i class="fa-solid fa-building-columns"></i> East Coast Port Matrix
+            </button>
+            <button class="tab-btn" onclick="switchTab('routes')">
+                <i class="fa-solid fa-earth-americas"></i> Trade Lane Geonavigator
+            </button>
+            <button class="tab-btn" onclick="switchTab('dossier')">
+                <i class="fa-solid fa-file-signature"></i> Procurement Dossier
+            </button>
+        </div>
+    </nav>
+
+    <!-- App Content Wrapper -->
+    <main class="main-content">
+
+        <!-- ================= TAB 1: EXECUTIVE COCKPIT ================= -->
+        <section id="tab-cockpit" class="tab-content active">
+            <!-- Alert Banner System -->
+            <div id="alertsContainer" class="alerts-stream">
+                <!-- Dynamically injected active alerts -->
+            </div>
+
+            <!-- Baltic Indices Live Ticker Ribbon -->
+            <div class="section-heading">
+                <h2><i class="fa-solid fa-globe"></i> Global Dry Bulk Freight Indices & Market Pulse</h2>
+                <span class="timestamp-tag">Updated Daily via Baltic Exchange Proxy</span>
+            </div>
+
+            <div class="grid-4-cards" id="indicesCards">
+                <div class="ticker-card glass-card">
+                    <div class="ticker-header">
+                        <span class="ticker-symbol">BDI</span>
+                        <span class="ticker-name">Baltic Dry Index</span>
+                    </div>
+                    <div class="ticker-body">
+                        <div class="ticker-val" id="bdiVal">--</div>
+                        <div class="ticker-delta" id="bdiDelta">--</div>
+                    </div>
+                    <div class="ticker-sub">Overall Dry Bulk Sentiment</div>
+                </div>
+
+                <div class="ticker-card glass-card">
+                    <div class="ticker-header">
+                        <span class="ticker-symbol cape-badge">BCI</span>
+                        <span class="ticker-name">Baltic Capesize</span>
+                    </div>
+                    <div class="ticker-body">
+                        <div class="ticker-val text-amber-400" id="bciVal">--</div>
+                        <div class="ticker-delta" id="bciDelta">--</div>
+                    </div>
+                    <div class="ticker-sub">120k–180k+ DWT Coal/Ore Haulers</div>
+                </div>
+
+                <div class="ticker-card glass-card">
+                    <div class="ticker-header">
+                        <span class="ticker-symbol panamax-badge">BPI</span>
+                        <span class="ticker-name">Baltic Panamax</span>
+                    </div>
+                    <div class="ticker-body">
+                        <div class="ticker-val text-cyan-400" id="bpiVal">--</div>
+                        <div class="ticker-delta" id="bpiDelta">--</div>
+                    </div>
+                    <div class="ticker-sub">70k–85k DWT Kamsarmax/Panamax</div>
+                </div>
+
+                <div class="ticker-card glass-card">
+                    <div class="ticker-header">
+                        <span class="ticker-symbol supra-badge">BSI</span>
+                        <span class="ticker-name">Baltic Supramax</span>
+                    </div>
+                    <div class="ticker-body">
+                        <div class="ticker-val text-emerald-400" id="bsiVal">--</div>
+                        <div class="ticker-delta" id="bsiDelta">--</div>
+                    </div>
+                    <div class="ticker-sub">50k–65k DWT Geared Vessels</div>
+                </div>
+            </div>
+
+            <!-- Macro Drivers & Energy Ribbon -->
+            <div class="grid-4-cards mt-4">
+                <div class="metric-card glass-card">
+                    <div class="metric-icon"><i class="fa-solid fa-gas-pump text-rose-400"></i></div>
+                    <div class="metric-content">
+                        <div class="metric-title">VLSFO Bunker (Singapore)</div>
+                        <div class="metric-val" id="bunkerVal">$--- / MT</div>
+                        <div class="metric-sub" id="bunkerDelta">7d trend</div>
+                    </div>
+                </div>
+
+                <div class="metric-card glass-card">
+                    <div class="metric-icon"><i class="fa-solid fa-gem text-amber-300"></i></div>
+                    <div class="metric-content">
+                        <div class="metric-title">Platts Hard Coking Coal</div>
+                        <div class="metric-val" id="coalVal">$--- / MT</div>
+                        <div class="metric-sub" id="coalDelta">FOB Australia</div>
+                    </div>
+                </div>
+
+                <div class="metric-card glass-card">
+                    <div class="metric-icon"><i class="fa-solid fa-industry text-blue-400"></i></div>
+                    <div class="metric-content">
+                        <div class="metric-title">China Steel Mfg PMI</div>
+                        <div class="metric-val" id="pmiVal">--.-</div>
+                        <div class="metric-sub">Global demand indicator</div>
+                    </div>
+                </div>
+
+                <div class="metric-card glass-card">
+                    <div class="metric-icon"><i class="fa-solid fa-cloud-bolt text-indigo-400"></i></div>
+                    <div class="metric-content">
+                        <div class="metric-title">East Coast Congestion</div>
+                        <div class="metric-val" id="congestionVal">--</div>
+                        <div class="metric-sub" id="monsoonStatus">Weather factor</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Executive Strategic Recommendations Summary -->
+            <div class="grid-2-cols mt-6">
+                <div class="glass-card panel-padded">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-compass"></i> High-Level Charter Strategy Matrix</h3>
+                        <span class="badge-accent">SAIL Fleet Advisory</span>
+                    </div>
+                    <div class="strategy-summary-content">
+                        <div class="strategic-pill">
+                            <div class="sp-icon"><i class="fa-solid fa-arrows-split-up-and-left text-cyan-400"></i></div>
+                            <div class="sp-text">
+                                <strong>Core Mission: Spot to Multi-Voyage Transition</strong>
+                                <p>Historically, SAIL relies heavily on daily reactive spot exploration. Our optimization models prove that securing 3–6 voyage Consecutive Voyage Contracts (CVC) or Medium-Term COA yields <strong>8.5% to 12.8% net freight savings</strong> and mitigates seasonal monsoon squeeze.</p>
+                            </div>
+                        </div>
+
+                        <div class="strategic-pill mt-3">
+                            <div class="sp-icon"><i class="fa-solid fa-ship text-emerald-400"></i></div>
+                            <div class="sp-text">
+                                <strong>Vessel Upsizing & Draft Maximization</strong>
+                                <p>Discharging Capesize vessels at deepwater ports (Gangavaram & Dhamra: 18m–20m draft) slashes landed freight to <strong>$14–$18/MT</strong> compared to Supramax ($24–$28/MT). For Haldia, automated Sandheads lighterage yields superior unit economics over direct Handysize shipping.</p>
+                            </div>
+                        </div>
+
+                        <div class="strategic-pill mt-3">
+                            <div class="sp-icon"><i class="fa-solid fa-triangle-exclamation text-amber-400"></i></div>
+                            <div class="sp-text">
+                                <strong>Demurrage Risk Mitigation</strong>
+                                <p>Paradip port pre-berthing wait times peak at 3.5 days during post-monsoon restocking. Algorithmic chartering recommends specifying <em>reversible laytime</em> and 25,000+ TPD guaranteed discharge clauses in mid-term tenders.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card panel-padded">
+                    <div class="panel-header">
+                        <h3><i class="fa-solid fa-chart-pie"></i> SAIL Steel Plants Raw Material Flow</h3>
+                        <span class="badge-blue">Annual Intake: ~14.5M MT</span>
+                    </div>
+                    <div class="flows-table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Steel Plant</th>
+                                    <th>Primary Port</th>
+                                    <th>Preferred Vessel</th>
+                                    <th>Annual Met Coal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Rourkela (RSP)</strong></td>
+                                    <td>Dhamra / Paradip</td>
+                                    <td><span class="tag-cape">Capesize</span> / Panamax</td>
+                                    <td>3.8 Million MT</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bhilai (BSP)</strong></td>
+                                    <td>Gangavaram / Vizag</td>
+                                    <td><span class="tag-cape">Capesize</span> (Deep draft)</td>
+                                    <td>4.2 Million MT</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Bokaro (BSL)</strong></td>
+                                    <td>Paradip / Dhamra</td>
+                                    <td><span class="tag-panamax">Panamax</span> / Cape</td>
+                                    <td>3.6 Million MT</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Durgapur (DSP)</strong></td>
+                                    <td>Haldia / Dhamra</td>
+                                    <td><span class="tag-supra">Supramax</span> / Lightered</td>
+                                    <td>1.8 Million MT</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>IISCO (Burnpur)</strong></td>
+                                    <td>Haldia / Sandheads</td>
+                                    <td><span class="tag-handy">Handy</span> / Supramax</td>
+                                    <td>1.1 Million MT</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 2: FREIGHT FORECAST STUDIO ================= -->
+        <section id="tab-forecast" class="tab-content">
+            <div class="control-ribbon glass-card">
+                <div class="control-group">
+                    <label><i class="fa-solid fa-route"></i> Select Target Route / Benchmark:</label>
+                    <select id="forecastTargetSelect" class="form-select" onchange="fetchAndRenderForecast()">
+                        <optgroup label="Key SAIL Import Routes ($/MT)">
+                            <option value="rate_aus_dhamra_cape" selected>Australia (Hay Point) -> Dhamra (Capesize)</option>
+                            <option value="rate_aus_paradip_panamax">Australia (Hay Point) -> Paradip (Panamax)</option>
+                            <option value="rate_indo_haldia_supramax">Indonesia (Taboneo) -> Haldia (Supramax)</option>
+                            <option value="rate_indo_paradip_panamax">Indonesia (Taboneo) -> Paradip (Panamax)</option>
+                            <option value="rate_us_vizag_cape">US East Coast -> Vizag/Gangavaram (Capesize)</option>
+                            <option value="rate_moz_gangavaram_panamax">Mozambique (Maputo) -> Gangavaram (Panamax)</option>
+                            <option value="rate_rus_paradip_supramax">Russia (Taman) -> Paradip (Supramax)</option>
+                        </optgroup>
+                        <optgroup label="Baltic Benchmark Indices">
+                            <option value="bdi">Baltic Dry Index (BDI)</option>
+                            <option value="bci">Baltic Capesize Index (BCI)</option>
+                            <option value="bpi">Baltic Panamax Index (BPI)</option>
+                            <option value="bsi">Baltic Supramax Index (BSI)</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label><i class="fa-regular fa-clock"></i> Forecast Horizon:</label>
+                    <div class="btn-group-segmented">
+                        <button class="seg-btn" onclick="setHorizon(30, this)">30 Days (Spot)</button>
+                        <button class="seg-btn active" onclick="setHorizon(90, this)">90 Days (Short-Term)</button>
+                        <button class="seg-btn" onclick="setHorizon(180, this)">180 Days (Mid-Term)</button>
+                        <button class="seg-btn" onclick="setHorizon(365, this)">365 Days (COA)</button>
+                    </div>
+                </div>
+
+                <div class="control-group-action">
+                    <button class="btn-primary" onclick="fetchAndRenderForecast()">
+                        <i class="fa-solid fa-arrows-rotate"></i> Re-Calculate Forecast
+                    </button>
+                </div>
+            </div>
+
+            <!-- Forecast Insight Callout Banner -->
+            <div class="forecast-insight-card glass-card mt-4" id="forecastInsightBox">
+                <div class="insight-left">
+                    <div class="signal-tag" id="timingSignalTag">ANALYZING SIGNAL...</div>
+                    <div class="regime-name" id="regimeTitle">Market Regime Analysis</div>
+                    <div class="insight-narrative" id="timingNarrativeText">Evaluating forward trajectory...</div>
+                </div>
+                <div class="insight-stats">
+                    <div class="stat-mini">
+                        <span class="sm-label">Current Rate</span>
+                        <span class="sm-val" id="fcCurrentRate">--</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="sm-label">Forward Shift</span>
+                        <span class="sm-val" id="fcTrendPct">--</span>
+                    </div>
+                    <div class="stat-mini">
+                        <span class="sm-label">Confidence Band</span>
+                        <span class="sm-val text-cyan-400">80% & 95%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Chart Canvas -->
+            <div class="chart-container-box glass-card mt-4">
+                <div class="chart-header">
+                    <div class="chart-title">
+                        <i class="fa-solid fa-chart-area text-cyan-400"></i>
+                        <span id="chartCanvasTitle">Historical Trajectory & Multi-Horizon Forward Projections</span>
+                    </div>
+                    <div class="chart-legend-custom">
+                        <span class="leg-item"><span class="leg-dot bg-blue-500"></span> Historical</span>
+                        <span class="leg-item"><span class="leg-dot bg-cyan-400"></span> Point Forecast</span>
+                        <span class="leg-item"><span class="leg-box bg-cyan-alpha"></span> 80% Confidence Bound</span>
+                        <span class="leg-item"><span class="leg-box bg-indigo-alpha"></span> 95% Value-at-Risk</span>
+                    </div>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="forecastChartCanvas"></canvas>
+                </div>
+            </div>
+
+            <!-- Driver Attribution Grid -->
+            <div class="glass-card panel-padded mt-4">
+                <div class="panel-header">
+                    <h3><i class="fa-solid fa-brain text-purple-400"></i> AI Feature Attribution: Key Macro Drivers of This Route</h3>
+                    <span class="badge-blue">Gradient Boosting Shapley Weights</span>
+                </div>
+                <div class="drivers-grid" id="driversContainer">
+                    <!-- Dynamic drivers bars -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 3: CHARTER OPTIMIZER & SIMULATOR ================= -->
+        <section id="tab-simulator" class="tab-content">
+            <div class="simulator-layout">
+                <!-- Left: Configuration Form -->
+                <div class="sim-sidebar glass-card">
+                    <div class="sidebar-header">
+                        <h3><i class="fa-solid fa-sliders text-cyan-400"></i> Voyage Parameters</h3>
+                        <p class="text-xs text-slate-400">Configure shipment requirements for algorithmic vessel & contract matching.</p>
+                    </div>
+
+                    <form id="charterSimForm" onsubmit="runCharterSimulation(event)">
+                        <div class="form-field">
+                            <label><i class="fa-solid fa-mountain text-amber-400"></i> Commodity Type</label>
+                            <select id="simCommodity" class="form-select">
+                                <option value="coking_coal" selected>Hard Coking Coal (HCC)</option>
+                                <option value="thermal_coal">Thermal Coal (Non-Coking)</option>
+                                <option value="pci_coal">PCI Coal / Anthracite</option>
+                                <option value="limestone_flux">Limestone / Flux</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label><i class="fa-solid fa-weight-hanging text-cyan-400"></i> Cargo Parcel Volume (Metric Tons)</label>
+                            <input type="number" id="simVolume" class="form-input" value="150000" min="20000" max="1000000" step="5000" required>
+                            <div class="input-hint">SAIL typical parcels: 55kt (Supramax), 75kt (Panamax), 150kt (Capesize)</div>
+                        </div>
+
+                        <div class="form-field">
+                            <label><i class="fa-solid fa-anchor text-blue-400"></i> Overseas Loading Port (Origin)</label>
+                            <select id="simOrigin" class="form-select">
+                                <option value="hay_point" selected>Hay Point / DBCT (Australia)</option>
+                                <option value="gladstone">Gladstone (Australia)</option>
+                                <option value="taboneo">Taboneo Anchorage (Indonesia)</option>
+                                <option value="hampton_roads">Hampton Roads (USA East Coast)</option>
+                                <option value="maputo">Maputo Matola (Mozambique)</option>
+                                <option value="taman">Taman Seaport (Russia)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label><i class="fa-solid fa-location-dot text-rose-400"></i> Discharge Port (India East Coast)</label>
+                            <select id="simDestination" class="form-select">
+                                <option value="dhamra" selected>Dhamra Port (DPCL) - Max Draft 18.0m</option>
+                                <option value="paradip">Paradip Port (PPA) - Max Draft 16.0m</option>
+                                <option value="gangavaram">Gangavaram Port (GPL) - Max Draft 20.2m</option>
+                                <option value="visakhapatnam_outer">Visakhapatnam Outer Harbour - Max Draft 18.1m</option>
+                                <option value="visakhapatnam_inner">Visakhapatnam Inner Harbour - Max Draft 14.5m</option>
+                                <option value="gopalpur">Gopalpur Port - Max Draft 14.0m</option>
+                                <option value="haldia">Haldia Dock Complex - Max Draft 8.5m</option>
+                            </select>
+                        </div>
+
+                        <div class="form-field">
+                            <label><i class="fa-solid fa-gas-pump text-emerald-400"></i> Fuel Price Baseline (VLSFO $/MT)</label>
+                            <input type="number" id="simBunker" class="form-input" value="580" min="300" max="1200" step="10">
+                        </div>
+
+                        <div class="form-field">
+                            <label><i class="fa-regular fa-calendar text-purple-400"></i> Contract Horizon Evaluation</label>
+                            <select id="simHorizon" class="form-select">
+                                <option value="3">3 Months (Quarterly Procurement)</option>
+                                <option value="6" selected>6 Months (Bi-Annual Contract)</option>
+                                <option value="12">12 Months (Annual COA Commitment)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-checkbox-row">
+                            <input type="checkbox" id="simLighterage" checked>
+                            <label for="simLighterage">Allow Sandheads lighterage for Haldia shallow draft</label>
+                        </div>
+
+                        <button type="submit" class="btn-primary w-full mt-4">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Run Optimization & Analysis
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right: Optimization Results & Strategic Comparison -->
+                <div class="sim-results">
+                    <!-- Top Winning Recommendation Card -->
+                    <div class="glass-card panel-padded border-cyan" id="optimalVesselBanner">
+                        <div class="opt-banner-header">
+                            <div>
+                                <span class="badge-emerald"><i class="fa-solid fa-circle-check"></i> RECOMMENDED OPTIMAL VESSEL</span>
+                                <h2 class="mt-2 text-2xl text-cyan-300" id="optVesselName">Capesize / Baby Cape</h2>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-slate-400 text-xs">TOTAL LANDED UNIT COST</span>
+                                <div class="text-3xl font-bold text-white" id="optUnitCost">$25.96 <span class="text-sm font-normal text-slate-300">/ MT</span></div>
+                                <div class="text-sm text-cyan-400 font-semibold" id="optUnitCostINR">₹2,271 / MT</div>
+                            </div>
+                        </div>
+
+                        <p class="opt-narrative mt-3 text-slate-300 leading-relaxed" id="optNarrativeText">
+                            Loading optimization analysis...
+                        </p>
+
+                        <!-- Quick KPI Chips -->
+                        <div class="kpi-chips-grid mt-4">
+                            <div class="kpi-chip">
+                                <i class="fa-solid fa-ship text-cyan-400"></i>
+                                <div>
+                                    <div class="kc-label">Voyages Needed</div>
+                                    <div class="kc-val" id="kcVoyages">1 Voyage</div>
+                                </div>
+                            </div>
+                            <div class="kpi-chip">
+                                <i class="fa-regular fa-clock text-amber-400"></i>
+                                <div>
+                                    <div class="kc-label">Total Turnaround</div>
+                                    <div class="kc-val" id="kcDays">21.5 Days</div>
+                                </div>
+                            </div>
+                            <div class="kpi-chip">
+                                <i class="fa-solid fa-water text-blue-400"></i>
+                                <div>
+                                    <div class="kc-label">Port Draft Margin</div>
+                                    <div class="kc-val text-emerald-400" id="kcDraft">Safe (+0.2m)</div>
+                                </div>
+                            </div>
+                            <div class="kpi-chip">
+                                <i class="fa-solid fa-indian-rupee-sign text-emerald-400"></i>
+                                <div>
+                                    <div class="kc-label">Total Landed Value</div>
+                                    <div class="kc-val text-emerald-400" id="kcTotalINR">₹38.94 Cr</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CONTRACT STRATEGY EVALUATOR: Spot vs Multi-Voyage vs COA -->
+                    <div class="glass-card panel-padded mt-4 border-amber" id="contractEvaluationPanel">
+                        <div class="panel-header">
+                            <div>
+                                <h3><i class="fa-solid fa-scale-balanced text-amber-400"></i> Contract Horizon Strategy: Moving From Spot to Multi-Voyage COA</h3>
+                                <p class="text-xs text-slate-400">Quantitative financial comparison of charter contract structures for SAIL</p>
+                            </div>
+                            <span class="badge-amber" id="recStrategyBadge">RECOMMENDED: COA</span>
+                        </div>
+
+                        <div class="contract-callout-box mt-3" id="contractRationaleBox">
+                            <div class="cc-headline" id="ccHeadline">Aggressive Hedge: Lock in Medium-Term Multi-Voyage COA</div>
+                            <div class="cc-detail" id="ccDetail">Analysis loading...</div>
+                        </div>
+
+                        <!-- 3-Way Contract Comparison Cards -->
+                        <div class="grid-3-cards mt-4" id="contractCardsGrid">
+                            <!-- Card A: Spot Charter -->
+                            <div class="contract-card glass-card">
+                                <div class="cc-header">
+                                    <span class="badge-red">STATUS QUO</span>
+                                    <h4>Single Spot Fixtures</h4>
+                                    <span class="cc-sub">Ad-Hoc Daily Booking</span>
+                                </div>
+                                <div class="cc-body">
+                                    <div class="cc-rate" id="spotRateDisplay">$24.38 <span class="text-xs text-slate-400">/ MT</span></div>
+                                    <div class="cc-total" id="spotTotalDisplay">₹44.82 Cr Total</div>
+                                    <div class="risk-badge-high mt-2"><i class="fa-solid fa-circle-exclamation"></i> HIGH VOLATILITY RISK</div>
+                                    <div class="cc-metrics mt-3">
+                                        <div class="cm-row"><span>Savings vs Spot:</span> <strong>₹0.00 Cr (0%)</strong></div>
+                                        <div class="cm-row"><span>95% VaR Upside Risk:</span> <strong class="text-rose-400" id="spotVarDisplay">₹52.4 Cr</strong></div>
+                                        <div class="cm-row"><span>Demurrage Exposure:</span> <strong>High (+15%)</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card B: Short-Term Multi-Voyage -->
+                            <div class="contract-card glass-card">
+                                <div class="cc-header">
+                                    <span class="badge-blue">TACTICAL</span>
+                                    <h4>Short-Term Multi-Voyage</h4>
+                                    <span class="cc-sub">3–6 Consecutive Voyages</span>
+                                </div>
+                                <div class="cc-body">
+                                    <div class="cc-rate text-cyan-300" id="shortRateDisplay">$22.80 <span class="text-xs text-slate-400">/ MT</span></div>
+                                    <div class="cc-total" id="shortTotalDisplay">₹41.91 Cr Total</div>
+                                    <div class="risk-badge-med mt-2"><i class="fa-solid fa-shield"></i> LOCKED RATE (6.5% Disc.)</div>
+                                    <div class="cc-metrics mt-3">
+                                        <div class="cm-row"><span>Projected Savings:</span> <strong class="text-emerald-400" id="shortSavingsDisplay">₹2.91 Cr</strong></div>
+                                        <div class="cm-row"><span>Operational Agility:</span> <strong>High</strong></div>
+                                        <div class="cm-row"><span>Laytime Protection:</span> <strong>Reversible</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card C: Medium-Term COA -->
+                            <div class="contract-card glass-card border-emerald">
+                                <div class="cc-header">
+                                    <span class="badge-emerald">RECOMMENDED</span>
+                                    <h4>Medium-Term COA</h4>
+                                    <span class="cc-sub">6–12 Month Affreightment</span>
+                                </div>
+                                <div class="cc-body">
+                                    <div class="cc-rate text-emerald-300" id="coaRateDisplay">$21.70 <span class="text-xs text-slate-400">/ MT</span></div>
+                                    <div class="cc-total text-emerald-400" id="coaTotalDisplay">₹39.89 Cr Total</div>
+                                    <div class="risk-badge-low mt-2"><i class="fa-solid fa-lock"></i> MAXIMUM HEDGE (11% Disc.)</div>
+                                    <div class="cc-metrics mt-3">
+                                        <div class="cm-row"><span>Projected Savings:</span> <strong class="text-emerald-400 text-lg" id="coaSavingsDisplay">₹4.93 Cr</strong></div>
+                                        <div class="cm-row"><span>Supply Guarantee:</span> <strong>100% Guaranteed</strong></div>
+                                        <div class="cm-row"><span>Priority Berthing:</span> <strong>Enabled</strong></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Port Physical Feasibility Matrix -->
+                    <div class="glass-card panel-padded mt-4">
+                        <div class="panel-header">
+                            <h3><i class="fa-solid fa-list-check text-cyan-400"></i> Port Infrastructure & Vessel Feasibility Checklist</h3>
+                            <span class="badge-blue">Safety & Compliance</span>
+                        </div>
+                        <div class="table-responsive mt-3">
+                            <table class="data-table" id="feasibilityTable">
+                                <thead>
+                                    <tr>
+                                        <th>Vessel Class</th>
+                                        <th>Typical DWT</th>
+                                        <th>Draft (m)</th>
+                                        <th>LOA / Beam</th>
+                                        <th>Feasibility Status</th>
+                                        <th>Total Landed Unit Cost</th>
+                                        <th>Efficiency Score</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feasibilityTableBody">
+                                    <!-- Injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Cost Breakdown & Idle Timeline Details -->
+                    <div class="grid-2-cols mt-4">
+                        <div class="glass-card panel-padded">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-coins text-amber-400"></i> Landed Cost Breakdown ($/MT)</h3>
+                            </div>
+                            <div class="breakdown-list" id="costBreakdownList">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+
+                        <div class="glass-card panel-padded">
+                            <div class="panel-header">
+                                <h3><i class="fa-solid fa-hourglass-half text-indigo-400"></i> Voyage Timeline & Idle Reduction</h3>
+                            </div>
+                            <div class="timeline-steps" id="voyageTimelineList">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 4: EAST COAST PORT MATRIX ================= -->
+        <section id="tab-ports" class="tab-content">
+            <div class="section-heading">
+                <h2><i class="fa-solid fa-building-columns"></i> Indian East Coast Ports Infrastructure & Bottlenecks</h2>
+                <span class="timestamp-tag">Technical Specs for Paradip, Vizag, Gangavaram, Gopalpur, Dhamra, Haldia & Sandheads</span>
+            </div>
+
+            <div class="ports-grid mt-4" id="portsGrid">
+                <!-- Dynamically populated cards for each East Coast port -->
+            </div>
+        </section>
+
+        <!-- ================= TAB 5: TRADE LANE GEONAVIGATOR ================= -->
+        <section id="tab-routes" class="tab-content">
+            <div class="section-heading">
+                <h2><i class="fa-solid fa-earth-americas"></i> Global Bulk Shipping Trade Lanes to East Coast India</h2>
+                <span class="timestamp-tag">Key Origins: Australia, USA, Mozambique, Indonesia, Russia</span>
+            </div>
+
+            <div class="glass-card panel-padded mt-4">
+                <div id="routeMap" class="route-map-canvas"></div>
+            </div>
+
+            <div class="grid-3-cards mt-4">
+                <div class="glass-card panel-padded">
+                    <h4 class="text-cyan-400 font-bold"><i class="fa-solid fa-route"></i> Australia -> East Coast</h4>
+                    <p class="text-sm text-slate-300 mt-2"><strong>Distance:</strong> ~5,200 Nautical Miles</p>
+                    <p class="text-sm text-slate-300"><strong>Transit:</strong> 15–16 days laden at 13.5 kts</p>
+                    <p class="text-sm text-slate-300"><strong>Key Chokepoints:</strong> Lombok / Sunda Strait or Torres Strait</p>
+                    <p class="text-xs text-slate-400 mt-2">Largest coking coal corridor for SAIL (Hay Point/Gladstone to Dhamra/Paradip).</p>
+                </div>
+
+                <div class="glass-card panel-padded">
+                    <h4 class="text-blue-400 font-bold"><i class="fa-solid fa-route"></i> Indonesia -> East Coast</h4>
+                    <p class="text-sm text-slate-300 mt-2"><strong>Distance:</strong> ~2,400 Nautical Miles</p>
+                    <p class="text-sm text-slate-300"><strong>Transit:</strong> 7–8 days laden at 13.0 kts</p>
+                    <p class="text-sm text-slate-300"><strong>Key Chokepoints:</strong> Malacca Strait / Singapore Strait</p>
+                    <p class="text-xs text-slate-400 mt-2">High frequency thermal & PCI coal routes, ideal for Supramax & Panamax shuttles.</p>
+                </div>
+
+                <div class="glass-card panel-padded">
+                    <h4 class="text-indigo-400 font-bold"><i class="fa-solid fa-route"></i> US East Coast -> India</h4>
+                    <p class="text-sm text-slate-300 mt-2"><strong>Distance:</strong> ~9,800 Nautical Miles</p>
+                    <p class="text-sm text-slate-300"><strong>Transit:</strong> 29–32 days laden via Cape</p>
+                    <p class="text-sm text-slate-300"><strong>Key Chokepoints:</strong> Cape of Good Hope</p>
+                    <p class="text-xs text-slate-400 mt-2">Ultra-long haul. Bunker fuel efficiency and Capesize parcel sizing are paramount.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ================= TAB 6: PROCUREMENT COMMITTEE DOSSIER ================= -->
+        <section id="tab-dossier" class="tab-content">
+            <div class="dossier-actions-bar">
+                <button class="btn-primary" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Print / Export Executive Dossier (PDF)
+                </button>
+                <button class="btn-secondary" onclick="exportDossierJSON()">
+                    <i class="fa-solid fa-download"></i> Export Data JSON
+                </button>
+            </div>
+
+            <div class="dossier-document glass-card" id="printableDossier">
+                <div class="dossier-header-crest">
+                    <div class="dh-titles">
+                        <div class="gov-title">GOVERNMENT OF INDIA • MINISTRY OF STEEL</div>
+                        <div class="sail-title">STEEL AUTHORITY OF INDIA LIMITED (SAIL)</div>
+                        <div class="doc-title">INTELLIGENT VESSEL CHARTERING & FREIGHT PROCUREMENT DOSSIER</div>
+                        <div class="doc-sub">Smart India Hackathon 2026 • Problem Statement ID: 26006</div>
+                    </div>
+                    <div class="dh-meta">
+                        <div><strong>Reference No:</strong> SAIL/LOG/CHARTER/2026/09</div>
+                        <div><strong>Date:</strong> <span id="dossierDate">03 September 2026</span></div>
+                        <div><strong>Classification:</strong> OFFICIAL USE ONLY</div>
+                    </div>
+                </div>
+
+                <hr class="dossier-divider">
+
+                <div class="dossier-section">
+                    <h3>1. EXECUTIVE SUMMARY & DECISION DIRECTIVE</h3>
+                    <p>
+                        This dossier presents the algorithmic determination for raw material vessel chartering and bulk freight hedging. In accordance with the mandate to move from multiple single spot market fixtures to short-term and medium-term multiple voyage contracts (COA), the quantitative model recommends executing a <strong>Medium-Term Multiple Voyage Contract (COA)</strong> for the upcoming bi-annual lifting schedule.
+                    </p>
+                    <div class="dossier-kpi-grid">
+                        <div class="dk-box">
+                            <span class="dk-lbl">Target Commodity</span>
+                            <span class="dk-v" id="dosCommodity">Hard Coking Coal (HCC)</span>
+                        </div>
+                        <div class="dk-box">
+                            <span class="dk-lbl">Origin & Discharge</span>
+                            <span class="dk-v" id="dosRoute">Hay Point (AUS) -> Dhamra (IND)</span>
+                        </div>
+                        <div class="dk-box">
+                            <span class="dk-lbl">Recommended Vessel</span>
+                            <span class="dk-v text-cyan-400" id="dosVessel">Capesize (160k DWT)</span>
+                        </div>
+                        <div class="dk-box">
+                            <span class="dk-lbl">Projected Savings vs Spot</span>
+                            <span class="dk-v text-emerald-400" id="dosSavings">₹4.93 Crores</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dossier-section mt-4">
+                    <h3>2. VESSEL SELECTION & PORT RESTRICTION COMPLIANCE</h3>
+                    <p id="dosPortNarrative">
+                        Physical compliance evaluation confirms that Dhamra Port's 18.0m permissible draft accommodates fully laden Capesize vessels without requiring offshore lighterage. High mechanized discharge capacity (45,000 TPD) restricts port stay to 3.3 days, limiting demurrage exposure.
+                    </p>
+                </div>
+
+                <div class="dossier-section mt-4">
+                    <h3>3. COMPARATIVE PROCUREMENT CONTRACT ECONOMICS</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Procurement Mechanism</th>
+                                <th>Unit Freight ($/MT)</th>
+                                <th>Total Period Outlay (₹ Cr)</th>
+                                <th>Variance vs Spot</th>
+                                <th>Risk & Operational Exposure</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dosContractTableBody">
+                            <!-- Injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="dossier-section mt-4">
+                    <h3>4. RISK MITIGATION, WEATHER & IDLE TIME CONTROLS</h3>
+                    <ul class="dossier-bullets">
+                        <li><strong>Bay of Bengal Seasonal Controls:</strong> Pre-scheduled laycan windows to avoid peak cyclone depression clusters in October–November.</li>
+                        <li><strong>Reversible Laytime Clause:</strong> Charter party terms must enforce reversible laytime between loading terminal (e.g. DBCT) and discharge berth to absorb queueing shocks.</li>
+                        <li><strong>Triangulated Ballasting:</strong> Recommends backhaul fixtures with iron ore/fines to East Asia to minimize shipowner deadhead ballast cost, securing competitive freight bids for SAIL.</li>
+                    </ul>
+                </div>
+
+                <div class="dossier-signatures mt-8">
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">Prepared by: Logistics Analytics Cell (SAIL)</div>
+                    </div>
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">Reviewed by: GM (Raw Material Procurement)</div>
+                    </div>
+                    <div class="sig-block">
+                        <div class="sig-line"></div>
+                        <div class="sig-title">Approved by: Procurement Steering Committee</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- App JS -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
