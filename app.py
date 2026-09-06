@@ -36,7 +36,13 @@ app.add_middleware(
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 static_dir = os.path.join(base_dir, "static")
-templates_dir = os.path.join(base_dir, "templates")
+
+# Support root, template, or templates directory
+templates_dir = base_dir
+for candidate_dir in [os.path.join(base_dir, "templates"), os.path.join(base_dir, "template")]:
+    if os.path.exists(candidate_dir):
+        templates_dir = candidate_dir
+        break
 
 app.mount("/static", StaticFiles(directory=static_dir), name="static")
 templates = Jinja2Templates(directory=templates_dir)
@@ -61,10 +67,16 @@ from fastapi.responses import HTMLResponse
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
-    index_file = os.path.join(templates_dir, "index.html")
-    with open(index_file, "r", encoding="utf-8") as f:
-        html_content = f.read()
-    return HTMLResponse(content=html_content)
+    candidates = [
+        os.path.join(base_dir, "index.html"),
+        os.path.join(base_dir, "template", "index.html"),
+        os.path.join(base_dir, "templates", "index.html"),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            with open(candidate, "r", encoding="utf-8") as f:
+                return HTMLResponse(content=f.read())
+    return HTMLResponse(content="<h1>index.html not found</h1>", status_code=404)
 
 @app.get("/api/market-pulse")
 def get_market_pulse():

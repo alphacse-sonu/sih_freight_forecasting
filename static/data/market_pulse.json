@@ -1,0 +1,68 @@
+{
+  "status": "success",
+  "pulse": {
+    "date": "31 Aug 2026",
+    "indices": {
+      "bdi": {
+        "value": 1044,
+        "change_7d": 48,
+        "pct_7d": 4.82
+      },
+      "bci": {
+        "value": 1320,
+        "change_7d": 240,
+        "pct_7d": 22.22
+      },
+      "bpi": {
+        "value": 959,
+        "change_7d": 12,
+        "pct_7d": 1.27
+      },
+      "bsi": {
+        "value": 858,
+        "change_7d": 4,
+        "pct_7d": 0.47
+      }
+    },
+    "macro": {
+      "bunker_vlsfo": {
+        "value": 628.5,
+        "change_7d": 10.5,
+        "pct_7d": 1.7
+      },
+      "coking_coal": {
+        "value": 274.9,
+        "change_7d": 17.6,
+        "pct_7d": 6.84
+      },
+      "brent_crude": {
+        "value": 95.28
+      },
+      "china_pmi": {
+        "value": 47.0
+      },
+      "congestion_index": {
+        "value": 0.93
+      },
+      "monsoon_risk": {
+        "value": 0.79
+      }
+    }
+  },
+  "alerts": [
+    {
+      "severity": "CRITICAL",
+      "category": "FREIGHT VOLATILITY",
+      "title": "Capesize Index Surging (+22.2% in 7 days)",
+      "description": "Baltic Capesize Index is undergoing an aggressive upward breakout. Spot charter fixtures will experience rapid bid inflation. Lock in 3-voyage coverage immediately.",
+      "timestamp": "Updated Today"
+    },
+    {
+      "severity": "CAUTION",
+      "category": "BAY OF BENGAL MONSOON",
+      "title": "Adverse Weather Swell Window",
+      "description": "Sandheads lighterage operations and Haldia channel transit restricted by swell & siltation. Reroute deep-draft parcels to Dhamra or Gangavaram deep berths.",
+      "timestamp": "Seasonal Alert"
+    }
+  ]
+}

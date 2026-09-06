@@ -13,7 +13,9 @@ from sklearn.linear_model import Ridge
 import os
 
 class FreightForecaster:
-    def __init__(self, data_path="/Users/sonukumar/Desktop/sih_freight_forecasting/data/freight_timeseries_2018_2026.csv"):
+    def __init__(self, data_path=None):
+        if data_path is None:
+            data_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "freight_timeseries_2018_2026.csv")
         self.data_path = data_path
         self.df = None
         self.models = {}

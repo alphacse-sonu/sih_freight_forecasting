@@ -13,7 +13,9 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 
-def generate_historical_freight_dataset(output_path="/Users/sonukumar/Desktop/sih_freight_forecasting/data/freight_timeseries_2018_2026.csv"):
+def generate_historical_freight_dataset(output_path=None):
+    if output_path is None:
+        output_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "freight_timeseries_2018_2026.csv")
     np.random.seed(42)
     start_date = datetime(2018, 1, 1)
     end_date = datetime(2026, 8, 31)
